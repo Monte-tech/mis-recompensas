@@ -209,33 +209,43 @@ async function loadCard() {
 
         const response = await fetch(CSV_URL);
 
-        const text = await response.text();
+        let text = await response.text();
 
-        console.log(text);
+        // limpiar UTF8
+        text = text.replace(/^\uFEFF/, '');
 
         const rows = text.trim().split(/\r?\n/);
+
+        console.log(rows);
 
         let found = null;
 
         for (let i = 1; i < rows.length; i++) {
 
             const cols = rows[i]
-            .replace(/\r/g, '')
-            .split(',');
+            .split(',')
+            .map(col =>
+                col
+                .replace(/"/g, '')
+                .trim()
+            );
+
+            console.log(cols);
 
             const cliente = {
 
-                id: cols[0]?.trim(),
+                id: cols[0],
 
                 sellos: parseInt(cols[1]) || 0,
 
-                nombre: cols[2]?.trim()
-
+                nombre: cols[2]
             };
 
             console.log(cliente);
 
-            if (cliente.id === id) {
+            if (
+                cliente.id === id
+            ) {
 
                 found = cliente;
 
@@ -253,7 +263,8 @@ async function loadCard() {
             return;
         }
 
-        document.getElementById('card').style.display = 'block';
+        document.getElementById('card').style.display =
+        'block';
 
         document.getElementById('userName').innerText =
         found.nombre;
@@ -305,10 +316,6 @@ function renderSteps(count) {
 
 loadCard();
 
-// refresco automático
-setInterval(loadCard, 30000);
-
 </script>
-
 </body>
 </html>
