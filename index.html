@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panko - Mis Recompensas</title>
+    <!-- Usamos PapaParse para leer el CSV publicado -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+        :root { --bg: #43b1c9; --white: #ffffff; --sauce: #f7e018; }
+        body { background: var(--bg); font-family: sans-serif; display: flex; justify-content: center; padding: 20px; color: white; }
+        .card { background: rgba(255,255,255,0.2); border: 3px solid white; border-radius: 20px; padding: 20px; width: 100%; max-width: 350px; text-align: center; }
+        .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
+        .step { background: rgba(255,255,255,0.3); border: 2px solid white; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 10px; }
+        .step.active { background: var(--sauce); color: #333; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="card" id="card" style="display:none;">
+        <h2 id="nombre">Cargando...</h2>
+        <p>Tus sellos acumulados:</p>
+        <div class="steps" id="grid"></div>
+    </div>
+
+    <script>
+        // PEGA AQUÍ TU LINK DE "PUBLICAR EN LA WEB" (CSV)
+        const CSV_URL = "TU_LINK_AQUI_QUE_TERMINA_EN_CSV";
+
+        async function init() {
+            const params = new URLSearchParams(window.location.search);
+            const clientId = params.get('id');
+
+            if (!clientId) return;
+
+            Papa.parse(CSV_URL, {
+                download: true,
+                header: true,
+                complete: function(results) {
+                    const user = results.data.find(row => row.ID == clientId);
+                    if (user) {
+                        document.getElementById('card').style.display = 'block';
+                        document.getElementById('nombre').innerText = user.CLIENTE;
+                        render(user.SELLOS);
+                    }
+                }
+            });
+        }
+
+        function render(count) {
+            const grid = document.getElementById('grid');
+            for (let i = 1; i <= 9; i++) {
+                const div = document.createElement('div');
+                div.className = `step ${i <= count ? 'active' : ''}`;
+                div.innerText = i === 9 ? "🎁" : i;
+                grid.appendChild(div);
+            }
+        }
+        init();
+    </script>
+</body>
+</html>
