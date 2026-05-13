@@ -1,6 +1,7 @@
 <script>
 
-const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRbXL1Y_NsoPSaYsTJ5OJCQjFemmQTj94AkZku0bxSi4oKvbpJ9KOHwkXE0mgXxmLZA40uwv4rkV1WG/pub?output=csv";
+const CSV_URL =
+"https://docs.google.com/spreadsheets/d/e/2PACX-1vRbXL1Y_NsoPSaYsTJ5OJCQjFemmQTj94AkZku0bxSi4oKvbpJ9KOHwkXE0mgXxmLZA40uwv4rkV1WG/pub?output=csv";
 
 async function loadCard() {
 
@@ -11,7 +12,7 @@ async function loadCard() {
     if (!id) {
 
         document.body.innerHTML =
-            "<h1>Link inválido.</h1>";
+        "<h1 style='color:white'>ID inválido</h1>";
 
         return;
     }
@@ -20,33 +21,34 @@ async function loadCard() {
 
         const response = await fetch(CSV_URL);
 
-        const csvText = await response.text();
+        const text = await response.text();
 
-        const rows = csvText.split('\n').slice(1);
+        const rows = text.trim().split('\n');
 
-        let clienteEncontrado = null;
+        let found = null;
 
-        rows.forEach(row => {
+        for (let i = 1; i < rows.length; i++) {
 
-            const cols = row.split(',');
+            const cols = rows[i].split(',');
 
             const cliente = {
                 id: cols[0]?.trim(),
-                sellos: parseInt(cols[1]),
-                nombre: cols[2]?.trim(),
-                tel: cols[3]?.trim()
+                sellos: parseInt(cols[1]) || 0,
+                nombre: cols[2]?.trim()
             };
 
             if (cliente.id === id) {
 
-                clienteEncontrado = cliente;
-            }
-        });
+                found = cliente;
 
-        if (!clienteEncontrado) {
+                break;
+            }
+        }
+
+        if (!found) {
 
             document.body.innerHTML =
-                "<h1>Cliente no encontrado.</h1>";
+            "<h1 style='color:white'>Cliente no encontrado</h1>";
 
             return;
         }
@@ -54,16 +56,16 @@ async function loadCard() {
         document.getElementById('card').style.display = 'block';
 
         document.getElementById('userName').innerText =
-            clienteEncontrado.nombre;
+            found.nombre;
 
-        renderSteps(clienteEncontrado.sellos);
+        renderSteps(found.sellos);
 
-    } catch (error) {
+    } catch (err) {
+
+        console.error(err);
 
         document.body.innerHTML =
-            "<h1>Error cargando tarjeta.</h1>";
-
-        console.error(error);
+        "<h1 style='color:white'>Error cargando tarjeta</h1>";
     }
 }
 
@@ -75,14 +77,14 @@ function renderSteps(count) {
 
     grid.innerHTML = '';
 
-    sauce.style.width = (count / 9) * 100 + "%";
+    sauce.style.width = ((count / 9) * 100) + "%";
 
     for (let i = 1; i <= 9; i++) {
 
         const div = document.createElement('div');
 
         div.className =
-            `step ${i <= count ? 'active' : ''}`;
+        `step ${i <= count ? 'active' : ''}`;
 
         div.innerHTML = i === 9 ? "🎁" : i;
 
@@ -92,7 +94,7 @@ function renderSteps(count) {
     if (count >= 9) {
 
         document.getElementById('statusMsg').innerText =
-            "¡FELICIDADES! Tienes un premio listo 🌭";
+        "¡FELICIDADES! Premio desbloqueado 🌭";
     }
 }
 
